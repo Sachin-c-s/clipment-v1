@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YT Toolkit</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="logo"><i class="ti ti-brand-youtube" aria-hidden="true"></i> YT Toolkit</div>
+    <div class="url-wrap">
+      <input type="text" id="urlInput" placeholder="Paste a YouTube URL…" />
+      <button class="go-btn" onclick="processVideo()"><i class="ti ti-arrow-right" aria-hidden="true"></i> Process</button>
+    </div>
+
+  </div>
+
+  <!-- MAIN AREA -->
+  <div class="main">
+
+    <button class="tab-strip left-strip hidden" id="leftStrip" onclick="openLeft()">
+      <div class="tab-label"><i class="ti ti-layout-list"></i> Clips</div>
+    </button>
+
+    <!-- LEFT PANEL -->
+    <div class="side-panel left-panel" id="leftPanel">
+      <div class="panel-header">
+        <div>
+          <div class="panel-heading">Clips</div>
+          <div class="panel-sub" id="clipCount">No clips yet</div>
+        </div>
+        <button class="close-panel-btn" onclick="closeLeft()"><i class="ti ti-chevron-left"></i></button>
+      </div>
+      <div class="section-divider"></div>
+      <div class="panel-title">Search</div>
+      <div class="search-wrap">
+        <i class="ti ti-search"></i>
+        <input type="text" placeholder="Search clips…" oninput="filterClips(this.value)" />
+      </div>
+      <div class="panel-title" style="padding-top:2px;">All clips</div>
+      <div class="clips-list" id="clipsList">
+        <div style="padding:16px 14px;font-size:12px;color:#555;">
+          Paste a URL and click Process to generate clips.
+        </div>
+      </div>
+    </div>
+
+    <!-- PLAYER / CENTER -->
+    <div class="player-area" id="playerArea">
+
+      <!-- Progress area (shown while pipeline runs) -->
+      <div id="progressArea" style="display:none;flex-direction:column;align-items:center;gap:16px;width:100%;max-width:460px;">
+
+        <!-- Stage stepper -->
+        <div class="stage-stepper" id="stageStepper">
+          <div class="stage-step" data-stage="transcript">
+            <div class="stage-icon">📄</div>
+            <div class="stage-label">Transcript</div>
+          </div>
+          <div class="stage-connector"></div>
+          <div class="stage-step" data-stage="translate">
+            <div class="stage-icon">🌐</div>
+            <div class="stage-label">Translate</div>
+          </div>
+          <div class="stage-connector"></div>
+          <div class="stage-step" data-stage="keywords">
+            <div class="stage-icon">🔍</div>
+            <div class="stage-label">Keywords</div>
+          </div>
+          <div class="stage-connector"></div>
+          <div class="stage-step" data-stage="ai">
+            <div class="stage-icon">🧠</div>
+            <div class="stage-label">AI Analysis</div>
+          </div>
+          <div class="stage-connector"></div>
+          <div class="stage-step" data-stage="scoring">
+            <div class="stage-icon">✂️</div>
+            <div class="stage-label">Scoring</div>
+          </div>
+          <div class="stage-connector"></div>
+          <div class="stage-step" data-stage="download">
+            <div class="stage-icon">⬇️</div>
+            <div class="stage-label">Download</div>
+          </div>
+          <div class="stage-connector"></div>
+          <div class="stage-step" data-stage="cutting">
+            <div class="stage-icon">🎬</div>
+            <div class="stage-label">Cutting</div>
+          </div>
+        </div>
+
+        <!-- Current status message -->
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="spinner"></div>
+          <span id="statusMsg" style="font-size:12px;color:#888;">Starting…</span>
+        </div>
+
+        <!-- Collapsible log -->
+        <div style="width:100%;">
+          <button class="show-log-btn" id="showLogBtn" onclick="toggleLog()">
+            <i class="ti ti-terminal-2"></i> Show details
+          </button>
+          <pre id="logBox" style="
+            display:none;
+            width:100%;max-height:220px;overflow-y:auto;
+            background:#18181f;border:0.5px solid #2a2a35;
+            border-radius:8px;padding:10px 12px;margin-top:8px;
+            font-size:11px;color:#888;line-height:1.6;
+            white-space:pre-wrap;word-break:break-word;
+          "></pre>
+        </div>
+
+      </div>
+
+      <!-- Video player (shown after clips are ready) -->
+      <video id="mainVideo" width="320" controls
+        style="border-radius:10px;background:#000;aspect-ratio:9/16;display:none;max-height:70vh;">
+        <source src="" type="video/mp4" />
+      </video>
+
+      <div class="progress-bar" style="display:none;" id="fakeProgress">
+        <div class="progress-fill"></div>
+      </div>
+
+      <div class="score-bar">
+        <span class="score-label">Score</span>
+        <div class="score-dots" id="scoreDots">
+          <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        </div>
+        <span class="score-label" id="scoreVal">—</span>
+      </div>
+      <div class="divider"></div>
+      <div class="video-title" id="videoTitle">No clip selected</div>
+      <div class="meta-row">
+        <span class="badge" id="clipBadge">—</span>
+        <span style="font-size:12px;color:#666;" id="clipDur">—</span>
+      </div>
+      <a id="dlLink" href="#" download style="display:none;">
+        <button class="dl-btn"><i class="ti ti-download"></i> Download clip</button>
+      </a>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="side-panel right-panel" id="rightPanel">
+      <div class="panel-header">
+        <button class="close-panel-btn" onclick="closeRight()"><i class="ti ti-chevron-right"></i></button>
+        <div style="text-align:right;">
+          <div class="panel-heading">Config</div>
+          <div class="panel-sub">Keywords & regions</div>
+        </div>
+      </div>
+      <div class="section-divider"></div>
+
+      <!-- Countries -->
+      <div class="country-trigger-bar">
+        <div class="active-country">
+          <div class="active-flags" id="activeFlags"><span>🌐</span></div>
+        </div>
+        <button class="change-btn" onclick="document.getElementById('countryOverlay').classList.add('open')">Change</button>
+      </div>
+
+      <!-- Config inputs -->
+      <div class="panel-title">Settings</div>
+      <div class="config-inputs">
+        <div class="config-row">
+          <label class="config-label">Number of clips</label>
+          <input class="config-input" id="cfgTopN" type="number" min="1" max="10" value="" placeholder="e.g. 3" />
+        </div>
+        <div class="config-row">
+          <label class="config-label">Clip length (seconds)</label>
+          <input class="config-input" id="cfgWindow" type="number" min="15" max="180" value="" placeholder="e.g. 45" />
+        </div>
+        <div class="config-row">
+          <label class="config-label">Min gap between clips</label>
+          <input class="config-input" id="cfgGap" type="number" min="0" max="300" value="" placeholder="e.g. 30" />
+        </div>
+      </div>
+
+      <div class="section-divider"></div>
+      <div class="panel-title">Matched in clip</div>
+      <div class="keyword-chips" id="keywordChips">
+        <span style="font-size:11px;color:#555;padding:0 2px;">Keywords appear here after processing.</span>
+      </div>
+      <div class="section-divider"></div>
+      <div class="panel-title">All trending keywords</div>
+      <div class="keyword-chips" id="allKeywordChips">
+        <span style="font-size:11px;color:#555;padding:0 2px;">Trending keywords appear here after processing.</span>
+      </div>
+      <button class="show-more-btn" id="showMoreKwBtn" style="display:none;" onclick="toggleAllKeywords()">
+        Show <span id="showMoreKwCount"></span> more
+      </button>
+      <div class="section-divider"></div>
+      <div class="panel-title">Trim clip</div>
+
+      <!-- Placeholder before any clip is selected -->
+      <div id="trimPlaceholder" style="padding:4px 14px 10px;font-size:11px;color:#555;">
+        Select a clip to trim.
+      </div>
+
+      <!-- Trim editor (hidden until a clip is selected) -->
+      <div id="trimEditor" style="display:none;padding:0 12px 12px;display:none;flex-direction:column;gap:8px;">
+
+        <!-- Timeline bar -->
+        <div class="trim-timeline">
+          <div class="trim-range" id="trimRange"></div>
+          <div class="trim-handle trim-handle-start" id="handleStart"></div>
+          <div class="trim-handle trim-handle-end"   id="handleEnd"></div>
+          <div class="trim-playhead" id="trimPlayhead"></div>
+        </div>
+
+        <!-- Time inputs -->
+        <div class="trim-inputs-row">
+          <div class="trim-field">
+            <span class="trim-field-label">Start</span>
+            <input class="trim-input" id="trimStart" type="number" min="0" step="0.1" value="0"
+              oninput="onTrimInput()" />
+            <span class="trim-unit">s</span>
+          </div>
+          <div class="trim-sep">→</div>
+          <div class="trim-field">
+            <span class="trim-field-label">End</span>
+            <input class="trim-input" id="trimEnd" type="number" min="0" step="0.1" value="0"
+              oninput="onTrimInput()" />
+            <span class="trim-unit">s</span>
+          </div>
+        </div>
+
+        <div class="trim-duration-row">
+          <span class="trim-dur-label">Duration</span>
+          <span class="trim-dur-val" id="trimDurVal">—</span>
+        </div>
+
+        <button class="recut-btn" id="recutBtn" onclick="recutClip()">
+          <i class="ti ti-cut"></i> Re-cut clip
+        </button>
+        <div class="recut-msg" id="recutMsg" style="display:none;"></div>
+      </div>
+
+    </div>
+
+    <button class="tab-strip right-strip hidden" id="rightStrip" onclick="openRight()">
+      <div class="tab-label"><i class="ti ti-settings"></i> Config</div>
+    </button>
+
+  </div>
+
+  <!-- COUNTRY OVERLAY -->
+  <div class="overlay" id="countryOverlay">
+    <div class="popup">
+      <div class="popup-header">
+        <div>
+          <div style="font-size:14px;font-weight:600;color:#e8e8e8;">Select countries</div>
+          <div class="popup-hint">Select multiple — keywords from all will be combined</div>
+        </div>
+        <button class="close-btn" onclick="closePopup()"><i class="ti ti-x"></i></button>
+      </div>
+      <div class="country-grid" id="countryGrid"></div>
+      <div class="popup-footer">
+        <div class="selected-count">Selected: <span id="selCount">1</span></div>
+        <button class="confirm-btn" onclick="confirmCountries()">Apply</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
