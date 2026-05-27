@@ -1,4 +1,5 @@
 @echo off
+cd /d "%~dp0"
 title YT Toolkit
 echo  Starting YT Toolkit...
 echo  Your browser will open automatically.
