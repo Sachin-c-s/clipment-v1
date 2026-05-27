@@ -1,10 +1,9 @@
 flask
-gunicorn
-groq
-yt-dlp
+requests
+beautifulsoup4
 youtube-transcript-api
 deep-translator
-beautifulsoup4
-requests
-imageio[ffmpeg]
-lxml
+groq
+imageio
+imageio-ffmpeg
+yt-dlp
