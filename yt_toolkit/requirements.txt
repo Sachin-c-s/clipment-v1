@@ -1,0 +1,10 @@
+flask
+gunicorn
+groq
+yt-dlp
+youtube-transcript-api
+deep-translator
+beautifulsoup4
+requests
+imageio[ffmpeg]
+lxml
