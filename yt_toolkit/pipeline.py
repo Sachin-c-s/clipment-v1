@@ -47,7 +47,7 @@ def extract_video_id(url_or_id):
 def fetch_transcript(video_url, languages=None, source_lang="auto", log=print):
     """Fetch and return transcript segments. Returns list of {start, duration, text}."""
     video_id = extract_video_id(video_url)
-    api = YouTubeTranscriptApi(http_client=...)
+    api = YouTubeTranscriptApi()
     segments = []
     lang_used = ""
 
