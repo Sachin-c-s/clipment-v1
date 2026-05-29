@@ -4,4 +4,5 @@ paste
 GROQ_API_KEY=gsk_your_actual_key_here
 in an .env file 
 
+ren env .env (if you cant make it into .env)
 click the run.bat if you are using windows, or run.sh if you are using linux or mac
