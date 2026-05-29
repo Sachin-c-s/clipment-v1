@@ -285,13 +285,18 @@ def download_video(video_url, output_dir, log=print):
     log("⬇️ Downloading video...")
     t0 = time.time()
 
+    # Strip playlist/radio params — use clean URL with just the video ID
+    video_id  = extract_video_id(video_url)
+    clean_url = f"https://www.youtube.com/watch?v={video_id}"
+
     subprocess.run([
         "yt-dlp",
+        "--no-playlist",
         "-f", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]",
         "--merge-output-format", "mp4",
         "--ffmpeg-location", os.path.dirname(FFMPEG),
         "-o", full_path,
-        video_url
+        clean_url
     ], check=True, capture_output=True)
 
     # Manual merge fallback
@@ -372,35 +377,48 @@ def run(video_url, countries, groq_api_key, output_dir,
     """
     os.makedirs(output_dir, exist_ok=True)
 
+    def timed(label, fn):
+        """Run fn(), log how long it took, return its result."""
+        t = time.time()
+        result = fn()
+        log(f"   ⏱ {label} took {time.time() - t:.1f}s")
+        return result
+
+    total_start = time.time()
+
     log("📄 Fetching transcript...")
-    segments, lang_used = fetch_transcript(video_url, source_lang=source_lang, log=log)
+    segments, lang_used = timed("Transcript", lambda: fetch_transcript(video_url, source_lang=source_lang, log=log))
 
     log("🌐 Translating transcript...")
-    segments = translate_transcript(segments, source_lang=source_lang, log=log)
+    segments = timed("Translation", lambda: translate_transcript(segments, source_lang=source_lang, log=log))
 
     log("🔍 Scraping trending keywords...")
-    keywords = fetch_keywords(countries, log=log)
+    keywords = timed("Keywords", lambda: fetch_keywords(countries, log=log))
 
     log("🧠 Detecting idea boundaries with Groq...")
-    idea_starts = find_idea_boundaries(segments, groq_api_key, chunk_size=chunk_size, log=log)
+    idea_starts = timed("AI analysis", lambda: find_idea_boundaries(segments, groq_api_key, chunk_size=chunk_size, log=log))
 
     log("✂️ Scoring and picking best clips...")
-    picked = pick_best_clips(segments, keywords, idea_starts,
-                             window_seconds=window_seconds, top_n=top_n, min_gap=min_gap, log=log)
+    picked = timed("Scoring", lambda: pick_best_clips(segments, keywords, idea_starts,
+                             window_seconds=window_seconds, top_n=top_n, min_gap=min_gap, log=log))
 
     if not picked:
         log("⚠️ No clips found. Try different countries or a different video.")
         return [], keywords
 
     log("⬇️ Downloading video...")
-    full_video = download_video(video_url, output_dir, log=log)
+    full_video = timed("Download", lambda: download_video(video_url, output_dir, log=log))
 
     log("🎬 Cutting and resizing clips...")
-    filenames = cut_and_resize_clips(picked, full_video, output_dir, log=log)
+    filenames = timed("Cutting", lambda: cut_and_resize_clips(picked, full_video, output_dir, log=log))
 
     # Clean up full video to save space
     os.remove(full_video)
     log("🗑️ Cleaned up source video.")
+
+    total = time.time() - total_start
+    mins, secs = divmod(int(total), 60)
+    time_str = f"{mins}m {secs}s" if mins else f"{secs}s"
 
     results = []
     for clip, filename in zip(picked, filenames):
@@ -413,5 +431,5 @@ def run(video_url, countries, groq_api_key, output_dir,
             "keywords":  clip["keywords"],
         })
 
-    log(f"🎉 Done! {len(results)} clips ready.")
+    log(f"🎉 Done! {len(results)} clips ready — total time: {time_str}")
     return results, keywords

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Clipment</title>
+  <title>YT Toolkit</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 </head>
@@ -12,32 +12,13 @@
 
   <!-- TOP BAR -->
   <div class="topbar">
-    <div class="logo"><i class="ti ti-brand-youtube" aria-hidden="true"></i> Clipment</div>
+    <div class="logo"><i class="ti ti-brand-youtube" aria-hidden="true"></i> YT Toolkit</div>
     <div class="url-wrap">
       <input type="text" id="urlInput" placeholder="Paste a YouTube URL…" />
       <button class="go-btn" onclick="processVideo()"><i class="ti ti-arrow-right" aria-hidden="true"></i> Process</button>
-      <button class="key-toggle-btn" id="keyToggleBtn" onclick="toggleKeyBar()" title="Set Groq API key">
-        <i class="ti ti-key" aria-hidden="true"></i>
-      </button>
+
     </div>
 
-  </div>
-
-  <!-- SLIDING KEY BAR -->
-  <div class="key-bar" id="keyBar">
-    <div class="key-bar-inner">
-      <i class="ti ti-brand-openai" style="color:#a78bfa;font-size:15px;flex-shrink:0;"></i>
-      <span class="key-bar-label">Groq API Key</span>
-      <div class="key-input-wrap">
-        <input type="password" id="groqKeyInput" placeholder="gsk_…  (leave blank to use server key)"
-          autocomplete="off" spellcheck="false" />
-        <button class="key-eye-btn" onclick="toggleKeyVisibility()" title="Show / hide">
-          <i class="ti ti-eye" id="keyEyeIcon"></i>
-        </button>
-      </div>
-      <button class="key-save-btn" onclick="saveKey()"><i class="ti ti-check"></i> Save</button>
-      <div class="key-saved-msg" id="keySavedMsg"></div>
-    </div>
   </div>
 
   <!-- MAIN AREA -->
@@ -207,13 +188,15 @@
         <span style="font-size:11px;color:#555;padding:0 2px;">Keywords appear here after processing.</span>
       </div>
       <div class="section-divider"></div>
-      <div class="panel-title">All trending keywords</div>
+      <div class="panel-title" style="display:flex;align-items:center;justify-content:space-between;">
+        All trending keywords
+        <button class="show-more-btn" id="showMoreKwBtn" style="display:none;" onclick="toggleAllKeywords()">
+          +<span id="showMoreKwCount"></span> more
+        </button>
+      </div>
       <div class="keyword-chips" id="allKeywordChips">
         <span style="font-size:11px;color:#555;padding:0 2px;">Trending keywords appear here after processing.</span>
       </div>
-      <button class="show-more-btn" id="showMoreKwBtn" style="display:none;" onclick="toggleAllKeywords()">
-        Show <span id="showMoreKwCount"></span> more
-      </button>
       <div class="section-divider"></div>
       <div class="panel-title">Trim clip</div>
 

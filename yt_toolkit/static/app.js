@@ -1,28 +1,3 @@
-// ── Groq API key bar ──
-let _groqKey = '';
-
-function toggleKeyBar() {
-  const bar = document.getElementById('keyBar');
-  const btn = document.getElementById('keyToggleBtn');
-  const isOpen = bar.classList.toggle('open');
-  btn.classList.toggle('active', isOpen);
-  if (isOpen) document.getElementById('groqKeyInput').focus();
-}
-
-function toggleKeyVisibility() {
-  const input = document.getElementById('groqKeyInput');
-  const icon  = document.getElementById('keyEyeIcon');
-  const show  = input.type === 'password';
-  input.type  = show ? 'text' : 'password';
-  icon.className = show ? 'ti ti-eye-off' : 'ti ti-eye';
-}
-
-function saveKey() {
-  _groqKey = document.getElementById('groqKeyInput').value.trim();
-  const msg = document.getElementById('keySavedMsg');
-  msg.textContent = _groqKey ? '✓ Key saved' : '✓ Cleared';
-  setTimeout(() => { msg.textContent = ''; }, 2500);
-}
 
 // ── Panel open/close ──
 let leftOpen = true, rightOpen = true;
@@ -424,7 +399,6 @@ function processVideo() {
   if (!windowVal) errors.push('• Set the clip length (seconds) in the Config panel');
   if (!gapVal)    errors.push('• Set the minimum gap between clips in the Config panel');
 
-  if (!_groqKey) errors.push('• Enter your Groq API key (click the 🔑 key icon in the top bar)');
 
   if (errors.length > 0) {
     showValidationError(errors);
@@ -447,7 +421,7 @@ function processVideo() {
   fetch('/run', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ url, countries, window_seconds, top_n, min_gap, groq_api_key: _groqKey }),
+    body: JSON.stringify({ url, countries, window_seconds, top_n, min_gap }),
   })
     .then(r => r.json())
     .then(data => {

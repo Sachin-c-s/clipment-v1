@@ -1,9 +1,10 @@
 import os, uuid, threading, subprocess, time
+from dotenv import load_dotenv
+load_dotenv()
 from flask import Flask, render_template, request, jsonify, send_file
 import pipeline
 import imageio.plugins.ffmpeg as _ffmpeg_plugin
 FFMPEG = _ffmpeg_plugin.get_exe()
-
 app = Flask(__name__)
 
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")

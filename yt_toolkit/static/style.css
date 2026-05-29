@@ -261,7 +261,7 @@ html, body {
   font-size: 12px;
   outline: none;
 }
-.search-wrap i { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); font-size: 13px; color: #555; }
+.search-wrap i { position: absolute; left: 18px; top: calc(50% - 5px); transform: translateY(-50%); font-size: 13px; color: #555; }
 
 .clips-list {
   flex: 1;
@@ -318,6 +318,7 @@ html, body {
 .change-btn:hover { border-color: #a78bfa55; color: #a78bfa; }
 
 .keyword-chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 12px; }
+#allKeywordChips { max-height: 120px; overflow-y: auto; }
 .kw {
   background: #0f0f13;
   border: 0.5px solid #2a2a35;
@@ -545,16 +546,18 @@ html, body {
 
 /* ── Show more keywords button ── */
 .show-more-btn {
-  background: none;
-  border: none;
+  background: #0f0f13;
+  border: 0.5px solid #2a2a35;
   color: #a78bfa;
-  font-size: 11px;
-  padding: 4px 14px 8px;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 20px;
   cursor: pointer;
-  text-align: left;
-  width: 100%;
+  white-space: nowrap;
+  flex-shrink: 0;
+  line-height: 1.6;
 }
-.show-more-btn:hover { color: #c4b0ff; }
+.show-more-btn:hover { border-color: #a78bfa55; background: #1e1a2e; }
 
 /* ── Trim editor ── */
 .trim-timeline {
@@ -721,6 +724,19 @@ html, body {
   flex-shrink: 0;
   white-space: nowrap;
 }
+.key-get-link {
+  font-size: 11px;
+  color: #a78bfa;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  opacity: 0.8;
+  transition: opacity 0.15s;
+}
+.key-get-link:hover { opacity: 1; text-decoration: underline; }
 .key-input-wrap {
   flex: 1;
   position: relative;
