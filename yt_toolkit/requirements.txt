@@ -1,9 +1,0 @@
-flask
-requests
-beautifulsoup4
-youtube-transcript-api
-deep-translator
-groq
-imageio
-imageio-ffmpeg
-yt-dlp
