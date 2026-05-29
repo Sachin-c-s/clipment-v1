@@ -1,4 +1,4 @@
-IMPORTANT - edit the .env to include your own groq api key. https://console.groq.com/keys
+IMPORTANT - put a new .env to include your own groq api key. https://console.groq.com/keys
 
 paste
 GROQ_API_KEY=gsk_your_actual_key_here
